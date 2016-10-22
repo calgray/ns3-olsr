@@ -51,23 +51,24 @@ WifiPhyStandard phyStandard = WIFI_PHY_STANDARD_80211b;
 
 
 // Configuration
-std::string datarate 	= "200kb/s";
+std::string datarate 	= "10kb/s";
 uint32_t numNodes       = 50;
 double distance         = 1500.0;         // distance between nodes, meters
-bool enableCtsRts       = false;
+bool enableCtsRts       = true;
 bool useFriisDropoff 	= false;
 
 double logDropOff 	= 2.5;
 double mobilitySpeed	= 20.0;
 
 //Simulation Timing
-float routingTime       = 1.0;          // time added to start for olsr to converge, seconds
+float routingTime       = 0.0;          // time added to start for olsr to converge, seconds
 float simTime           = 20.0;		 // total simulation time after routing, seconds 
 double flowtime     	= 8.0;           // total time each source will transmit for.
 double sinkExtraTime    = 2.0;		 // extra timer the last packet has to reach the sink, seconds
 
 bool synchronisedStop   = false;         // whether source 2 and 3 should stop at the same time as source 1
 
+bool netanimCounters 	= false;
 double counterInterval  = 0.5;            // netanim counter update interval, seconds
 
 
@@ -222,23 +223,23 @@ void InitTopology()
   //mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   
   
+
+  /*
   mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel",
                              "Mode", StringValue ("Time"),
-                             "Time", StringValue("1s"), //pause time
-                             "Speed", StringValue ("ns3::ConstantRandomVariable[Constant=20.0]"),
+                             "Time", StringValue("0.1s"), //move interval
+                             "Speed", StringValue ("ns3::ConstantRandomVariable[Constant=10.0]"),
                              "Bounds", StringValue ("0|1500|0|1500"));
+  */
   
   
-  
-  
-  /* TODO: not sure how set multiple waypoints
   mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel",
 			    "Speed", PointerValue(CreateObjectWithAttributes<ns3::ConstantRandomVariable>("Constant", DoubleValue(mobilitySpeed))), 
-			    "Pause", StringValue("ns3::ConstantRandomVariable[Constant=0.0]"),
+			    "Pause", PointerValue(CreateObjectWithAttributes<ns3::ConstantRandomVariable>("Constant", DoubleValue(0.1))),
 			    "PositionAllocator", PointerValue(CreateObjectWithAttributes<ns3::RandomRectanglePositionAllocator>(
-						"X", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"),
-						"Y", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"))));
-  */
+			    "X", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"),
+			    "Y", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"))));
+  
  
   mobility.Install(c);
   
@@ -401,15 +402,20 @@ int main (int argc, char *argv[])
 
   ParseCommands(argc, argv);
 
+  ns3::SeedManager::SetSeed(3);
+  //ns3::SeedManager::SetRun(5);
+  
   InitTopology();
 
   //NetAnim Setup
   NS_LOG_UNCOND ("Outputing NetAnim to animation.xml");
   anim = new AnimationInterface("animation.xml");
-  anim->EnableWifiPhyCounters(Seconds(routingTime), Seconds(routingTime + simTime), Seconds(counterInterval));
-  anim->EnableWifiMacCounters(Seconds(routingTime), Seconds(routingTime + simTime), Seconds(counterInterval));
-  anim->EnableIpv4L3ProtocolCounters(Seconds(routingTime), Seconds(routingTime + simTime), Seconds(counterInterval));
-  anim->EnablePacketMetadata();
+  if(netanimCounters) {
+    anim->EnableWifiPhyCounters(Seconds(routingTime), Seconds(routingTime + simTime), Seconds(counterInterval));
+    anim->EnableWifiMacCounters(Seconds(routingTime), Seconds(routingTime + simTime), Seconds(counterInterval));
+    anim->EnableIpv4L3ProtocolCounters(Seconds(routingTime), Seconds(routingTime + simTime), Seconds(counterInterval));
+    anim->EnablePacketMetadata();
+  }
   anim->SetStartTime(Seconds(routingTime));
   anim->SetStopTime(Seconds(routingTime + simTime));
 
