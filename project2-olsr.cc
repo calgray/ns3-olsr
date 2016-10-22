@@ -51,23 +51,34 @@ WifiPhyStandard phyStandard = WIFI_PHY_STANDARD_80211b;
 
 
 // Configuration
-std::string datarate("50kb/s");
+std::string datarate 	= "200kb/s";
 uint32_t numNodes       = 50;
 double distance         = 1500.0;         // distance between nodes, meters
 bool enableCtsRts       = false;
 bool useFriisDropoff 	= false;
 
-
+double logDropOff 	= 2.5;
+double mobilitySpeed	= 20.0;
 
 //Simulation Timing
-float routingTime       = 0.0;          // time added to start for olsr to converge, seconds
-float simTime           = 10.0;		 // total simulation time after routing, seconds 
+float routingTime       = 1.0;          // time added to start for olsr to converge, seconds
+float simTime           = 20.0;		 // total simulation time after routing, seconds 
 double flowtime     	= 8.0;           // total time each source will transmit for.
 double sinkExtraTime    = 2.0;		 // extra timer the last packet has to reach the sink, seconds
 
 bool synchronisedStop   = false;         // whether source 2 and 3 should stop at the same time as source 1
 
 double counterInterval  = 0.5;            // netanim counter update interval, seconds
+
+
+uint32_t sourceNode1 	= 3;
+uint32_t sinkNode1 	= 49;
+uint32_t sourceNode2 	= 42;
+uint32_t sinkNode2 	= 25;
+uint32_t sourceNode3 	= 12;
+uint32_t sinkNode3 	= 1;
+
+
 
 //Helpers
 YansWifiPhyHelper wifiPhy;
@@ -99,6 +110,13 @@ void ParseCommands(int argc, char **argv)
   
   cmd.Parse (argc, argv);
 }
+
+
+//static in this context means make all variables in here persistant
+//static void CourseChange(std::string foo, Ptr<const MobilityModel> mobility) {
+  //Vector pos = mobility->GetPosition();
+  //NS_LOG_UNCOND(pos);
+//}
 
 void InitTopology()
 {
@@ -150,7 +168,7 @@ void InitTopology()
     wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
   }
   else {
-    wifiChannel.AddPropagationLoss("ns3::LogDistancePropagationLossModel", "Exponent", DoubleValue(2.5));
+    wifiChannel.AddPropagationLoss("ns3::LogDistancePropagationLossModel", "Exponent", DoubleValue(logDropOff));
   }
   
   wifiPhy.SetChannel (wifiChannel.Create ());
@@ -182,6 +200,7 @@ void InitTopology()
 				 "GridWidth", UintegerValue (7),
 				 "LayoutType", StringValue ("RowFirst"));
   */
+  
   /*
   mobility.SetPositionAllocator ("ns3::RandomDiscPositionAllocator",
 				 "X", StringValue("100.0"),
@@ -189,10 +208,10 @@ void InitTopology()
 				 "Rho", StringValue("ns3::UniformRandomVariable[Min=0,Max=20.0]"));
  */
   
+  
   mobility.SetPositionAllocator("ns3::RandomRectanglePositionAllocator",
 				"X", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"),
 				"Y", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"));
-  
 
   
   
@@ -202,24 +221,28 @@ void InitTopology()
     
   //mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   
-  /*
+  
   mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel",
                              "Mode", StringValue ("Time"),
-                             "Time", StringValue ("5s"),
-                             "Speed", StringValue ("ns3::ConstantRandomVariable[Constant=10.0]"),
+                             "Time", StringValue("1s"), //pause time
+                             "Speed", StringValue ("ns3::ConstantRandomVariable[Constant=20.0]"),
                              "Bounds", StringValue ("0|1500|0|1500"));
-  */
   
   
+  
+  
+  /* TODO: not sure how set multiple waypoints
   mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel",
-			    "Speed", StringValue("ns3::ConstantRandomVariable[Constant=20.0]"),
+			    "Speed", PointerValue(CreateObjectWithAttributes<ns3::ConstantRandomVariable>("Constant", DoubleValue(mobilitySpeed))), 
 			    "Pause", StringValue("ns3::ConstantRandomVariable[Constant=0.0]"),
 			    "PositionAllocator", PointerValue(CreateObjectWithAttributes<ns3::RandomRectanglePositionAllocator>(
 						"X", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"),
 						"Y", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"))));
-  
+  */
  
   mobility.Install(c);
+  
+  //Config::Connect("/NodeList/*/$ns3::MobilityModel/CourseChange", MakeCallback(&CourseChange));
   
   //===========================
   // Enable OLSR
@@ -269,8 +292,6 @@ void RunUDPSourceSink()
   int port = 80;
   TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 
-  uint32_t sourceNode;
-  uint32_t sinkNode;
   float startTime1 = 1.0;
   float startTime2 = 1.5;
   float startTime3 = 2.0;
@@ -280,29 +301,24 @@ void RunUDPSourceSink()
   //=========================
   //Flow 1 : 0 -> 24
   
-  sourceNode = 0;
-  sinkNode = 24;
-  
-  OnOffHelper onoff = OnOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
+  OnOffHelper onoff = OnOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode1), port)));
   onoff.SetConstantRate(DataRate(datarate));
-  app = onoff.Install(c.Get(sourceNode));
+  app = onoff.Install(c.Get(sourceNode1));
   app.Start(Seconds(routingTime + startTime1));
   app.Stop(Seconds(routingTime + startTime1 + flowtime));
   
-  PacketSinkHelper sink = PacketSinkHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
-  app = sink.Install(c.Get(sinkNode));
+  PacketSinkHelper sink = PacketSinkHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode1), port)));
+  app = sink.Install(c.Get(sinkNode1));
   app.Start(Seconds(routingTime + startTime1));
   app.Stop(Seconds(routingTime + startTime1 + flowtime + sinkExtraTime));
 
   
   //=========================
   //Flow 2 : 10 -> 14
-  sourceNode = 10;
-  sinkNode = 14;
   
-  onoff = OnOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
+  onoff = OnOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode2), port)));
   onoff.SetConstantRate(DataRate(datarate));
-  app = onoff.Install(c.Get(sourceNode));
+  app = onoff.Install(c.Get(sourceNode2));
   app.Start(Seconds(routingTime + startTime2));
   app.Stop(Seconds(routingTime + startTime2 + flowtime));
   if(synchronisedStop) {
@@ -311,20 +327,17 @@ void RunUDPSourceSink()
     app.Stop(Seconds(routingTime + startTime2 + flowtime));
   }
   
-  sink = PacketSinkHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
-  app = sink.Install(c.Get(sinkNode));
+  sink = PacketSinkHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode2), port)));
+  app = sink.Install(c.Get(sinkNode2));
   app.Start(Seconds(routingTime + startTime2));
   app.Stop(Seconds(routingTime + startTime2 + flowtime + sinkExtraTime));
   
   //=======================
   //Flow 3 : 20 -> 4
-
-  sourceNode = 20;
-  sinkNode = 4;
   
-  onoff = OnOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
+  onoff = OnOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode3), port)));
   onoff.SetConstantRate(DataRate(datarate));
-  app = onoff.Install(c.Get(sourceNode));
+  app = onoff.Install(c.Get(sourceNode3));
   app.Start(Seconds(routingTime + startTime3));
     if(synchronisedStop) {
     app.Stop(Seconds(routingTime + startTime1 + flowtime));
@@ -332,11 +345,22 @@ void RunUDPSourceSink()
     app.Stop(Seconds(routingTime + startTime3 + flowtime));
   }
   
-  sink = PacketSinkHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
-  app = sink.Install(c.Get(sinkNode));
+  sink = PacketSinkHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode3), port)));
+  app = sink.Install(c.Get(sinkNode3));
   app.Start(Seconds(routingTime + startTime3));
   app.Stop(Seconds(routingTime + startTime3 + flowtime + sinkExtraTime));
 
+  //====================
+  //these variables get removed after running
+  Ipv4Address src1 = i.GetAddress(sourceNode1);
+  Ipv4Address snk1 = i.GetAddress(sinkNode1);
+  Ipv4Address src2 = i.GetAddress(sourceNode2);
+  Ipv4Address snk2 = i.GetAddress(sinkNode2);
+  Ipv4Address src3 = i.GetAddress(sourceNode3);
+  Ipv4Address snk3 = i.GetAddress(sinkNode3);
+  
+  //====================
+  //Simulation
   
   Simulator::Stop (Seconds (routingTime + simTime));
   Simulator::Run ();
@@ -353,9 +377,10 @@ void RunUDPSourceSink()
   for(std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = stats.begin(); iter != stats.end(); ++iter) {
     Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow(iter->first);
     
-    if(  (t.sourceAddress == Ipv4Address("10.1.1.1")  && t.destinationAddress == Ipv4Address("10.1.1.25"))
-      || (t.sourceAddress == Ipv4Address("10.1.1.11") && t.destinationAddress == Ipv4Address("10.1.1.15"))
-      || (t.sourceAddress == Ipv4Address("10.1.1.21") && t.destinationAddress == Ipv4Address("10.1.1.5")))
+    //TODO: need to retreive the ip address from the container
+    if(  (t.sourceAddress == src1  && t.destinationAddress == snk1)
+      || (t.sourceAddress == src2  && t.destinationAddress == snk2)
+      || (t.sourceAddress == src3  && t.destinationAddress == snk3))
     {    
       NS_LOG_UNCOND("Flow ID: " << iter->first << " Src Addr: " << t.sourceAddress << " Dst Addr: " << t.destinationAddress);
       NS_LOG_UNCOND("Tx Packets = " << iter->second.txPackets);
