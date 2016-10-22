@@ -45,12 +45,13 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("Project-2");
 
-std::string phyMode ("OfdmRate6Mbps");
-WifiPhyStandard phyStandard = WIFI_PHY_STANDARD_80211a;
+//std::string phyMode ("OfdmRate6Mbps");
+std::string phyMode ("DsssRate1Mbps");
+WifiPhyStandard phyStandard = WIFI_PHY_STANDARD_80211b;
 
 
 // Configuration
-std::string datarate("500kb/s");
+std::string datarate("50kb/s");
 uint32_t numNodes       = 50;
 double distance         = 1500.0;         // distance between nodes, meters
 bool enableCtsRts       = false;
@@ -60,7 +61,7 @@ bool useFriisDropoff 	= false;
 
 //Simulation Timing
 float routingTime       = 0.0;          // time added to start for olsr to converge, seconds
-float simTime           = 30.0;		 // total simulation time after routing, seconds 
+float simTime           = 10.0;		 // total simulation time after routing, seconds 
 double flowtime     	= 8.0;           // total time each source will transmit for.
 double sinkExtraTime    = 2.0;		 // extra timer the last packet has to reach the sink, seconds
 
@@ -149,7 +150,7 @@ void InitTopology()
     wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
   }
   else {
-    wifiChannel.AddPropagationLoss("ns3::LogDistancePropagationLossModel", "Exponent", DoubleValue(3.0));
+    wifiChannel.AddPropagationLoss("ns3::LogDistancePropagationLossModel", "Exponent", DoubleValue(2.5));
   }
   
   wifiPhy.SetChannel (wifiChannel.Create ());
@@ -211,8 +212,8 @@ void InitTopology()
   
   
   mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel",
-			    "Speed", StringValue("ns3::ConstantRandomVariable[Constant=2Z0.0]"),
-			    "Pause", StringValue("ns3::ConstantRandomVariable[Constant=2.0]"),
+			    "Speed", StringValue("ns3::ConstantRandomVariable[Constant=20.0]"),
+			    "Pause", StringValue("ns3::ConstantRandomVariable[Constant=0.0]"),
 			    "PositionAllocator", PointerValue(CreateObjectWithAttributes<ns3::RandomRectanglePositionAllocator>(
 						"X", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"),
 						"Y", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"))));
