@@ -74,8 +74,10 @@ double counterInterval  = 0.5;            // netanim counter update interval, se
 
 uint32_t sourceNode1 	= 3;
 uint32_t sinkNode1 	= 49;
+
 uint32_t sourceNode2 	= 42;
 uint32_t sinkNode2 	= 25;
+
 uint32_t sourceNode3 	= 12;
 uint32_t sinkNode3 	= 1;
 
@@ -248,14 +250,17 @@ void InitTopology()
   //===========================
   // Enable OLSR
   Ipv4ListRoutingHelper list;
-  list.Add (staticRouting, 0);
   list.Add (olsr, 10);
+  list.Add (staticRouting, 0);
+
+  
+  
   
 
   //========================
   // Ipv4
   InternetStackHelper internet;
-  internet.SetRoutingHelper (list); // has effect on the next Install ()
+  internet.SetRoutingHelper(list); // has effect on the next Install ()
   internet.Install (c);
   
   Ipv4AddressHelper ipv4;
