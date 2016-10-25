@@ -17,8 +17,8 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#ifndef OLSR_HELPER_H
-#define OLSR_HELPER_H
+#ifndef OLSR_CUSTOM_HELPER_H
+#define OLSR_CUSTOM_HELPER_H
 
 #include "ns3/object-factory.h"
 #include "ns3/node.h"
@@ -37,28 +37,28 @@ namespace ns3 {
  * This class is expected to be used in conjunction with
  * ns3::InternetStackHelper::SetRoutingHelper
  */
-class OlsrHelper : public Ipv4RoutingHelper
+class OlsrCustomHelper : public Ipv4RoutingHelper
 {
 public:
   /**
-   * Create an OlsrHelper that makes life easier for people who want to install
+   * Create an OlsrCustomHelper that makes life easier for people who want to install
    * OLSR routing to nodes.
    */
-  OlsrHelper ();
+  OlsrCustomHelper ();
 
   /**
-   * \brief Construct an OlsrHelper from another previously initialized instance
+   * \brief Construct an OlsrCustomHelper from another previously initialized instance
    * (Copy Constructor).
    */
-  OlsrHelper (const OlsrHelper &);
+  OlsrCustomHelper (const OlsrCustomHelper &);
 
   /**
-   * \returns pointer to clone of this OlsrHelper
+   * \returns pointer to clone of this OlsrCustomHelper
    *
    * This method is mainly for internal use by the other helpers;
    * clients are expected to free the dynamic memory allocated by this method
    */
-  OlsrHelper* Copy (void) const;
+  OlsrCustomHelper* Copy (void) const;
 
   /**
     * \param node the node for which an exception is to be defined
@@ -69,7 +69,7 @@ public:
   void ExcludeInterface (Ptr<Node> node, uint32_t interface);
 
   /**
-   * \param node the node on which the routing protocol will run
+   * \param node the node on which the rOLSR_HELPER_CUSTOM_Houting protocol will run
    * \returns a newly-created routing protocol
    *
    * This method will be called by ns3::InternetStackHelper::Install
@@ -102,7 +102,7 @@ private:
    * \brief Assignment operator declared private and not implemented to disallow
    * assignment and prevent the compiler from happily inserting its own.
    */
-  OlsrHelper &operator = (const OlsrHelper &);
+  OlsrCustomHelper &operator = (const OlsrCustomHelper &);
   ObjectFactory m_agentFactory; //!< Object factory
 
   std::map< Ptr<Node>, std::set<uint32_t> > m_interfaceExclusions; //!< container of interfaces excluded from OLSR operations
@@ -110,5 +110,5 @@ private:
 
 } // namespace ns3
 
-#endif /* OLSR_HELPER_H */
+#endif /* OLSR_CUSTOM_HELPER_H */
  

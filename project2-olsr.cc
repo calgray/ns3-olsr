@@ -32,7 +32,7 @@
 #include "ns3/config-store-module.h"
 #include "ns3/wifi-module.h"
 #include "ns3/internet-module.h"
-#include "ns3/olsr-helper.h"
+
 #include "ns3/ipv4-static-routing-helper.h"
 #include "ns3/ipv4-list-routing-helper.h"
 
@@ -40,6 +40,10 @@
 
 #include "ns3/netanim-module.h"
 #include "ns3/flow-monitor-module.h"
+
+
+//#include "ns3/olsr-helper.h"
+#include "olsr-custom-helper.h"
 
 using namespace ns3;
 
@@ -85,8 +89,7 @@ uint32_t sinkNode3 	= 1;
 
 //Helpers
 YansWifiPhyHelper wifiPhy;
-OlsrHelper olsr;
-Ipv4StaticRoutingHelper staticRouting;
+
 
 //Objects
 NodeContainer c;
@@ -249,12 +252,13 @@ void InitTopology()
   
   //===========================
   // Enable OLSR
+  
+  OlsrCustomHelper olsr;
+  Ipv4StaticRoutingHelper staticRouting;
   Ipv4ListRoutingHelper list;
   list.Add (olsr, 10);
   list.Add (staticRouting, 0);
 
-  
-  
   
 
   //========================

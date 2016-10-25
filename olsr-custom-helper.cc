@@ -17,7 +17,7 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#include "olsr-helper.h"
+#include "olsr-custom-helper.h"
 #include "ns3/olsr-routing-protocol.h"
 #include "ns3/node-list.h"
 #include "ns3/names.h"
@@ -26,25 +26,25 @@
 
 namespace ns3 {
 
-OlsrHelper::OlsrHelper ()
+OlsrCustomHelper::OlsrCustomHelper ()
 {
   m_agentFactory.SetTypeId ("ns3::olsr::RoutingProtocol");
 }
 
-OlsrHelper::OlsrHelper (const OlsrHelper &o)
+OlsrCustomHelper::OlsrCustomHelper (const OlsrCustomHelper &o)
   : m_agentFactory (o.m_agentFactory)
 {
   m_interfaceExclusions = o.m_interfaceExclusions;
 }
 
-OlsrHelper*
-OlsrHelper::Copy (void) const
+OlsrCustomHelper*
+OlsrCustomHelper::Copy (void) const
 {
-  return new OlsrHelper (*this);
+  return new OlsrCustomHelper (*this);
 }
 
 void
-OlsrHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
+OlsrCustomHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
 {
   std::map< Ptr<Node>, std::set<uint32_t> >::iterator it = m_interfaceExclusions.find (node);
 
@@ -62,7 +62,7 @@ OlsrHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
 }
 
 Ptr<Ipv4RoutingProtocol>
-OlsrHelper::Create (Ptr<Node> node) const
+OlsrCustomHelper::Create (Ptr<Node> node) const
 {
   Ptr<olsr::RoutingProtocol> agent = m_agentFactory.Create<olsr::RoutingProtocol> ();
 
@@ -78,13 +78,13 @@ OlsrHelper::Create (Ptr<Node> node) const
 }
 
 void
-OlsrHelper::Set (std::string name, const AttributeValue &value)
+OlsrCustomHelper::Set (std::string name, const AttributeValue &value)
 {
   m_agentFactory.Set (name, value);
 }
 
 int64_t
-OlsrHelper::AssignStreams (NodeContainer c, int64_t stream)
+OlsrCustomHelper::AssignStreams (NodeContainer c, int64_t stream)
 {
   int64_t currentStream = stream;
   Ptr<Node> node;
