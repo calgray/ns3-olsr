@@ -17,6 +17,13 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
+
+
+/**
+ * TODO: Modify this class to take arguments to configure the OLSR
+ * implementation.
+ */
+
 #include "olsr-custom-helper.h"
 #include "ns3/olsr-routing-protocol.h"
 #include "ns3/node-list.h"
@@ -37,14 +44,12 @@ OlsrCustomHelper::OlsrCustomHelper (const OlsrCustomHelper &o)
   m_interfaceExclusions = o.m_interfaceExclusions;
 }
 
-OlsrCustomHelper*
-OlsrCustomHelper::Copy (void) const
+OlsrCustomHelper* OlsrCustomHelper::Copy (void) const
 {
   return new OlsrCustomHelper (*this);
 }
 
-void
-OlsrCustomHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
+void OlsrCustomHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
 {
   std::map< Ptr<Node>, std::set<uint32_t> >::iterator it = m_interfaceExclusions.find (node);
 
@@ -61,8 +66,7 @@ OlsrCustomHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
     }
 }
 
-Ptr<Ipv4RoutingProtocol>
-OlsrCustomHelper::Create (Ptr<Node> node) const
+Ptr<Ipv4RoutingProtocol> OlsrCustomHelper::Create (Ptr<Node> node) const
 {
   Ptr<olsr::RoutingProtocol> agent = m_agentFactory.Create<olsr::RoutingProtocol> ();
 
@@ -77,14 +81,12 @@ OlsrCustomHelper::Create (Ptr<Node> node) const
   return agent;
 }
 
-void
-OlsrCustomHelper::Set (std::string name, const AttributeValue &value)
+void OlsrCustomHelper::Set (std::string name, const AttributeValue &value)
 {
   m_agentFactory.Set (name, value);
 }
 
-int64_t
-OlsrCustomHelper::AssignStreams (NodeContainer c, int64_t stream)
+int64_t OlsrCustomHelper::AssignStreams (NodeContainer c, int64_t stream)
 {
   int64_t currentStream = stream;
   Ptr<Node> node;
