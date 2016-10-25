@@ -883,25 +883,22 @@ RoutingProtocol::MprComputation ()
   }
 #endif  //NS3_LOG_ENABLE
   
-  MprSet mprSubset = mprSet; //Type: std::set<Ipv4Address>
-  int mprSetSize = 0;
+  MprSet mprSubset = MprSet(); //Type: std::set<Ipv4Address>
+  int nodesAvailable = 0;
   for(MprSet::const_iterator iter = mprSet.begin(); iter != mprSet.end(); iter++)
   {
-    mprSetSize++;
+    nodesAvailable++;
   }
-  int mprSubsetSize = 0;
-  while(mprSubsetSize != mprSetSize / 2)
+  int nodesRequired = mprSubsetSize / 2;
+  MprSet::const_iterator iter = mprSet.begin();
+  while(nodesRequired)
   {
-    for(MprSet::const_iterator iter = mprSet.begin(); iter != mprSet.end(); iter++)
+    if(rand() % nodesAvailable < nodesRequired)
     {
-      if(rand() % 2)
-      {
         mprSubset.insert(*iter);
-        mprSet.erase(iter);
-        mprSubsetSize++;
-        continue;
-      }
+        nodesRequired--;	
     }
+	nodesAvailable--;
   }
   
   m_state.SetMprSet (mprSubset);
