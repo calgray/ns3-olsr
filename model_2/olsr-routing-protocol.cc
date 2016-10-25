@@ -899,6 +899,7 @@ RoutingProtocol::MprComputation ()
         nodesRequired--;	
     }
 	nodesAvailable--;
+	iter++
   }
   
   m_state.SetMprSet (mprSubset);
