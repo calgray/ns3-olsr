@@ -1,0 +1,41 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{latexsym}
+\usepackage{fullpage}
+\usepackage{gensymb}
+
+\title{Comparing the Performance of Modified OLSR Protocols}
+\author{Callan Gray, Nathan Stanley, James Udiljak}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We compare the performance of the standard OLSR protocol for ad-hoc wireless networking with several modified versions. The first modification involves including all one-hop neighbours of a node in that node's MPR set. Secondly, we modify OLSR to choose a random subset of the regular MPR set for each node, which is half the size of the original MPR set. Thirdly, we modify topology control (TC) messages sent by nodes to contain a random, half-length subset of the original MPR set. Finally we remove the condition that links to nodes in a node's MPR set must be bidirectional. Using ns-3, we compare the performance of these modified OLSR protocols to each other, as well as the original, unmodified protocol, for a network of 50 mobile nodes in a 1.5km by 1.5km area, each transmitting constant bit rate (CBR) traffic.
+\end{abstract}
+
+\section{The OLSR protocol}
+Blurb about OLSR here. Who created it, when did they do it, what class of routing algorithm is it and  what situations is it useful for. \cite{clausen2003optimized}
+
+\subsection{The MPR Set}
+Define the MPR set.
+
+\subsection{Topology Control Messages}
+Define TC messages.
+
+\section{ns-3}
+Blurb about ns-3 here.
+
+\section{Results}
+Show pretty graphs of network performance here.
+
+\section{Conclusion}
+Summarize results and explain phenomena observed.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
