@@ -239,27 +239,6 @@ void InitTopology()
 
 }
 
-void ReceivePacket (Ptr<Socket> socket)
-{
-  while (Ptr<Packet> packet = socket->Recv ())
-    {
-	//NS_LOG_UNCOND ("Received one packet!");
-    }
-}
-
-static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize, uint32_t pktCount, Time pktInterval )
-{
-  if (pktCount > 0)
-    {
-      socket->Send (Create<Packet> (pktSize));
-      Simulator::Schedule (pktInterval, &GenerateTraffic, socket, pktSize, pktCount-1, pktInterval);
-    }
-  else
-    {
-      socket->Close ();
-    }
-}
-
 void RunUDPSourceSink()
 {
   int port = 80;

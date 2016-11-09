@@ -1744,7 +1744,7 @@ RoutingProtocol::SendHello ()
           link_type = OLSR_LOST_LINK;
         }
         
-      NS_LOG_UNCOND("Searching for : " << link_tuple->neighborIfaceAddr);
+      //NS_LOG_UNCOND("Searching for : " << link_tuple->neighborIfaceAddr);
       
       // Establishes neighbor type.
       if (m_state.FindMprAddress (GetMainAddress (link_tuple->neighborIfaceAddr)))
@@ -1752,7 +1752,7 @@ RoutingProtocol::SendHello ()
 	   static int total = 0;
 	   total += 1;
 	  
-	  NS_LOG_UNCOND("======Mpr Address Found!==============================  total : " << total);
+	  //NS_LOG_UNCOND("======Mpr Address Found!==============================  total : " << total);
 	  
 
 	  
