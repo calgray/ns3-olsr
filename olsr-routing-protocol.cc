@@ -1842,7 +1842,7 @@ RoutingProtocol::SendTc ()
       MprSelectorSet halfvector;
       
       for(uint i = 0; i < (shuffledvector.size()+1)/2; i++) {
-	halfvector.insert(mprvector[i]);
+	halfvector.push_back(shuffledvector[i]);
       }
 	
       for (MprSelectorSet::const_iterator mprsel_tuple = halfvector.begin();
