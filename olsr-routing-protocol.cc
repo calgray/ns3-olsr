@@ -931,6 +931,7 @@ RoutingProtocol::MprComputation ()
     }
     
     //DEBUG
+    /*
     std::clog <<  "mprset : [";
     for(uint i = 0; i < mprvector.size(); i++) {
       std::clog << mprvector[i] << ",";
@@ -942,6 +943,7 @@ RoutingProtocol::MprComputation ()
       std::clog << mprvector[i] << ",";
     }
     std::clog << "]" << std::endl;
+    */
     
     m_state.SetMprSet (halfset);
   }
@@ -1741,9 +1743,20 @@ RoutingProtocol::SendHello ()
         {
           link_type = OLSR_LOST_LINK;
         }
+        
+      NS_LOG_UNCOND("Searching for : " << link_tuple->neighborIfaceAddr);
+      
       // Establishes neighbor type.
       if (m_state.FindMprAddress (GetMainAddress (link_tuple->neighborIfaceAddr)))
         {
+	   static int total = 0;
+	   total += 1;
+	  
+	  NS_LOG_UNCOND("======Mpr Address Found!==============================  total : " << total);
+	  
+
+	  
+	  
           nb_type = OLSR_MPR_NEIGH;
           NS_LOG_DEBUG ("I consider neighbor " << GetMainAddress (link_tuple->neighborIfaceAddr)
                                                << " to be MPR_NEIGH.");

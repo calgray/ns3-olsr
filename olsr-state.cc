@@ -27,7 +27,7 @@
 ///
 
 #include "olsr-state.h"
-
+#include "ns3/log.h"
 
 namespace ns3 {
 namespace olsr {
@@ -277,13 +277,12 @@ OlsrState::FindMprAddress (Ipv4Address const &addr)
   return (it != m_mprSet.end ());
 }
 
-void
-OlsrState::SetMprSet (MprSet mprSet)
+void OlsrState::SetMprSet (MprSet mprSet)
 {
   m_mprSet = mprSet;
 }
-MprSet
-OlsrState::GetMprSet () const
+
+MprSet OlsrState::GetMprSet () const
 {
   return m_mprSet;
 }

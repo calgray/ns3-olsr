@@ -53,10 +53,10 @@ WifiPhyStandard phyStandard = WIFI_PHY_STANDARD_80211b;
 
 
 // Configuration
-std::string datarate 	= "50kb/s";
+std::string datarate 	= "400kb/s";
 uint32_t numNodes       = 50;
 double distance         = 1500.0;         // distance between nodes, meters
-int nSources 		= 3;
+int nSources 		= 30;
 
 bool enableCtsRts       = true;
 double logDropOff 	= 2.3;
@@ -65,10 +65,11 @@ double mobilitySpeed	= 20.0;
 double mobilityPause	= 0.001;
 
 int seed 		= 4;
+int mode 		= 0;
 
 //Simulation Timing
-float routingTime       = 2.0;          // time added to start for olsr to converge, seconds
-double flowtime     	= 3.0;           // total time each source will transmit for.
+float routingTime       = 0.0;          // time added to start for olsr to converge, seconds
+double flowtime     	= 8.0;           // total time each source will transmit for.
 double sinkExtraTime    = 2.0;		 // extra timer the last packet has to reach the sink, seconds
 
 float totalTime         = routingTime +
@@ -216,12 +217,12 @@ void InitTopology()
   //===========================
   // Enable OLSR
   CustomOlsrHelper olsr = CustomOlsrHelper();
-  olsr.Set("Mode", UintegerValue(2));
+  olsr.Set("Mode", UintegerValue(mode));
   
   Ipv4StaticRoutingHelper staticRouting;
   Ipv4ListRoutingHelper list;
   list.Add (olsr, 10);
-  list.Add (staticRouting, 0);
+  //list.Add (staticRouting, 0);
 
   //========================
   // Ipv4
@@ -277,7 +278,7 @@ void RunUDPSourceSink()
     app.Stop(Seconds(routingTime + flowtime));
 
     PacketSinkHelper sink = PacketSinkHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
-    app.Start(Seconds(routingTime));
+    app.Start(Seconds(routingTime + n * 0.1));
     app.Stop(Seconds(routingTime + flowtime + sinkExtraTime));
   }
 
