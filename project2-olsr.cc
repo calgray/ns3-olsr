@@ -215,7 +215,9 @@ void InitTopology()
 
   //===========================
   // Enable OLSR
-  CustomOlsrHelper olsr = CustomOlsrHelper(0);
+  CustomOlsrHelper olsr = CustomOlsrHelper();
+  olsr.Set("Mode", UintegerValue(2));
+  
   Ipv4StaticRoutingHelper staticRouting;
   Ipv4ListRoutingHelper list;
   list.Add (olsr, 10);

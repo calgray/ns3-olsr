@@ -44,9 +44,13 @@
 #include "ns3/ipv4-route.h"
 #include "ns3/boolean.h"
 #include "ns3/uinteger.h"
+#include "ns3/integer.h"
 #include "ns3/enum.h"
 #include "ns3/trace-source-accessor.h"
 #include "ns3/ipv4-header.h"
+
+#include <algorithm>
+#include <numeric>
 
 /********** Useful macros **********/
 
@@ -116,6 +120,12 @@
 /// Willingness for forwarding packets from other nodes: always.
 #define OLSR_WILL_ALWAYS        7
 
+/****** Mode **********/
+#define MODE_DEFAULT            0
+#define MODE_1                  1
+#define MODE_2                  2
+#define MODE_3                  3
+#define MODE_4                  4
 
 /********** Miscellaneous constants **********/
 
@@ -179,6 +189,12 @@ RoutingProtocol::GetTypeId (void)
                                     OLSR_WILL_DEFAULT, "default",
                                     OLSR_WILL_HIGH, "high",
                                     OLSR_WILL_ALWAYS, "always"))
+    //TODO
+    .AddAttribute ("Mode", "Modifications to set",
+		   UintegerValue(0),
+		   MakeUintegerAccessor(&RoutingProtocol::m_mode),
+		   MakeUintegerChecker<uint32_t>())
+		   
     .AddTraceSource ("Rx", "Receive OLSR packet.",
                      MakeTraceSourceAccessor (&RoutingProtocol::m_rxPacketTrace),
                      "ns3::olsr::RoutingProtocol::PacketTxRxTracedCallback")
@@ -201,10 +217,13 @@ RoutingProtocol::RoutingProtocol ()
   m_midTimer (Timer::CANCEL_ON_DESTROY),
   m_hnaTimer (Timer::CANCEL_ON_DESTROY),
   m_queuedMessagesTimer (Timer::CANCEL_ON_DESTROY)
+
 {
   m_uniformRandomVariable = CreateObject<UniformRandomVariable> ();
 
   m_hnaRoutingTable = Create<Ipv4StaticRouting> ();
+
+  m_mode = 0; //TODO set default value
 }
 
 RoutingProtocol::~RoutingProtocol ()
@@ -371,6 +390,18 @@ void RoutingProtocol::SetMainInterface (uint32_t interface)
 {
   m_mainAddress = m_ipv4->GetAddress (interface, 0).GetLocal ();
 }
+
+void RoutingProtocol::SetMode(uint32_t mode)
+{
+  m_mode = mode;
+}
+
+uint32_t RoutingProtocol::GetMode() const
+{
+  return m_mode;
+}
+
+
 
 void RoutingProtocol::SetInterfaceExclusions (std::set<uint32_t> exceptions)
 {
@@ -697,8 +728,10 @@ RoutingProtocol::MprComputation ()
   // N_willingness equal to WILL_ALWAYS
   for (NeighborSet::const_iterator neighbor = N.begin (); neighbor != N.end (); neighbor++)
     {
-      if (neighbor->willingness == OLSR_WILL_ALWAYS) //TODO: MODIFICATION 1
-        {
+      //{ NS_LOG_UNCOND("Mode is " << m_mode); }
+      
+      if (m_mode == 1 || neighbor->willingness == OLSR_WILL_ALWAYS) //TODO: MODIFICATION 1
+      {
           mprSet.insert (neighbor->neighborMainAddr);
           // (not in RFC but I think is needed: remove the 2-hop
           // neighbors reachable by the MPR from N2)
@@ -863,6 +896,8 @@ RoutingProtocol::MprComputation ()
         }
     }
 
+
+    
 #ifdef NS3_LOG_ENABLE
   {
     std::ostringstream os;
@@ -883,8 +918,36 @@ RoutingProtocol::MprComputation ()
   }
 #endif  //NS3_LOG_ENABLE
 
+
   //TODO: MODIFICATION 2: Replace mprSet with random subset of half size.
-  m_state.SetMprSet (mprSet);
+  if(m_mode == 2) {
+    
+    std::vector<Ipv4Address> mprvector(mprSet.begin(), mprSet.end());
+    std::random_shuffle(mprvector.begin(), mprvector.end());
+    
+    MprSet halfset;
+    for(uint i = 0; i < (mprvector.size()+1)/2; i++) {
+      halfset.insert(mprvector[i]);
+    }
+    
+    //DEBUG
+    std::clog <<  "mprset : [";
+    for(uint i = 0; i < mprvector.size(); i++) {
+      std::clog << mprvector[i] << ",";
+    }
+    std::clog << "]" << std::endl;
+    
+    std::clog <<  "halfset : [";
+    for(uint i = 0; i < (mprvector.size()+1)/2; i++) {
+      std::clog << mprvector[i] << ",";
+    }
+    std::clog << "]" << std::endl;
+    
+    m_state.SetMprSet (halfset);
+  }
+  else {
+    m_state.SetMprSet (mprSet);
+  }
 }
 
 Ipv4Address

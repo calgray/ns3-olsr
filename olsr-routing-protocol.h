@@ -87,8 +87,9 @@ public:
    * \return The object TypeId.
    */
   static TypeId GetTypeId (void);
-
+  
   RoutingProtocol ();
+  
   virtual ~RoutingProtocol ();
 
   /**
@@ -97,6 +98,13 @@ public:
    * \param interface IPv4 interface index
    */
   void SetMainInterface (uint32_t interface);
+  
+  //TODO set mode declaration
+  void SetMode(uint32_t mode);
+  
+  //TODO set mode declaration
+  uint32_t GetMode() const;
+  
 
   /**
    * Dump the neighbor table, two-hop neighbor table, and routing table
@@ -138,7 +146,7 @@ public:
 private:
   std::set<uint32_t> m_interfaceExclusions; //!< Set of interfaces excluded by OSLR.
   Ptr<Ipv4StaticRouting> m_routingTableAssociation; //!< Associations from an Ipv4StaticRouting instance
-
+  
 public:
   /**
    * Get the excluded interfaces.
@@ -212,6 +220,9 @@ private:
   Time m_hnaInterval;     //!< HNA messages' emission interval.
   uint8_t m_willingness;  //!<  Willingness for forwarding packets on behalf of other nodes.
 
+  //TODO custom variables (make sure to assign to TypeId)
+  uint32_t m_mode;
+  
   OlsrState m_state;  //!< Internal state with all needed data structs.
   Ptr<Ipv4> m_ipv4;   //!< IPv4 object the routing is linked to.
 

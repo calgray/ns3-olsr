@@ -22,16 +22,12 @@
 #include "ns3/node-list.h"
 #include "ns3/names.h"
 #include "ns3/ptr.h"
+#include "ns3/uinteger.h"
 #include "ns3/ipv4-list-routing.h"
 
 namespace ns3 {
 
 CustomOlsrHelper::CustomOlsrHelper ()
-{
-  m_agentFactory.SetTypeId ("ns3::olsr::RoutingProtocol");
-}
-
-CustomOlsrHelper::CustomOlsrHelper(int mode)
 {
   m_agentFactory.SetTypeId ("ns3::olsr::RoutingProtocol");
 }
@@ -67,7 +63,7 @@ void CustomOlsrHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
 Ptr<Ipv4RoutingProtocol> CustomOlsrHelper::Create (Ptr<Node> node) const
 {
   Ptr<olsr::RoutingProtocol> agent = m_agentFactory.Create<olsr::RoutingProtocol> ();
-
+  
   std::map<Ptr<Node>, std::set<uint32_t> >::const_iterator it = m_interfaceExclusions.find (node);
 
   if (it != m_interfaceExclusions.end ())
@@ -79,11 +75,17 @@ Ptr<Ipv4RoutingProtocol> CustomOlsrHelper::Create (Ptr<Node> node) const
   return agent;
 }
 
-void
-CustomOlsrHelper::Set (std::string name, const AttributeValue &value)
+void CustomOlsrHelper::Set (std::string name, const AttributeValue &value)
 {
   m_agentFactory.Set (name, value);
 }
+
+//TODO custom method implementation
+void CustomOlsrHelper::SetMode(uint32_t mode)
+{
+  m_agentFactory.Set("Mode", UintegerValue(mode));
+}
+
 
 int64_t
 CustomOlsrHelper::AssignStreams (NodeContainer c, int64_t stream)

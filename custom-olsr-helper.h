@@ -20,6 +20,7 @@
 #ifndef CUSTOM_OLSR_HELPER_H
 #define CUSTOM_OLSR_HELPER_H
 
+#include "ns3/log.h"
 #include "ns3/object-factory.h"
 #include "ns3/node.h"
 #include "ns3/node-container.h"
@@ -45,8 +46,6 @@ public:
    * OLSR routing to nodes.
    */
   CustomOlsrHelper ();
-
-  CustomOlsrHelper (int mode);
   
   /**
    * \brief Construct an OlsrHelper from another previously initialized instance
@@ -86,6 +85,10 @@ public:
    */
   void Set (std::string name, const AttributeValue &value);
 
+  
+  //TODO custom method
+  void SetMode(uint32_t mode);
+  
   /**
    * Assign a fixed random variable stream number to the random variables
    * used by this model.  Return the number of streams (possibly zero) that
@@ -108,6 +111,7 @@ private:
   ObjectFactory m_agentFactory; //!< Object factory
 
   std::map< Ptr<Node>, std::set<uint32_t> > m_interfaceExclusions; //!< container of interfaces excluded from OLSR operations
+  
 };
 
 } // namespace ns3
