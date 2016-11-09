@@ -17,15 +17,8 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-
-
-/**
- * TODO: Modify this class to take arguments to configure the OLSR
- * implementation.
- */
-
-#include "olsr-custom-helper.h"
-#include "ns3/olsr-routing-protocol.h"
+#include "custom-olsr-helper.h"
+#include "olsr-routing-protocol.h"
 #include "ns3/node-list.h"
 #include "ns3/names.h"
 #include "ns3/ptr.h"
@@ -33,23 +26,28 @@
 
 namespace ns3 {
 
-OlsrCustomHelper::OlsrCustomHelper ()
+CustomOlsrHelper::CustomOlsrHelper ()
 {
   m_agentFactory.SetTypeId ("ns3::olsr::RoutingProtocol");
 }
 
-OlsrCustomHelper::OlsrCustomHelper (const OlsrCustomHelper &o)
+CustomOlsrHelper::CustomOlsrHelper(int mode)
+{
+  m_agentFactory.SetTypeId ("ns3::olsr::RoutingProtocol");
+}
+
+CustomOlsrHelper::CustomOlsrHelper (const CustomOlsrHelper &o)
   : m_agentFactory (o.m_agentFactory)
 {
   m_interfaceExclusions = o.m_interfaceExclusions;
 }
 
-OlsrCustomHelper* OlsrCustomHelper::Copy (void) const
+CustomOlsrHelper* CustomOlsrHelper::Copy (void) const
 {
-  return new OlsrCustomHelper (*this);
+  return new CustomOlsrHelper (*this);
 }
 
-void OlsrCustomHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
+void CustomOlsrHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
 {
   std::map< Ptr<Node>, std::set<uint32_t> >::iterator it = m_interfaceExclusions.find (node);
 
@@ -66,7 +64,7 @@ void OlsrCustomHelper::ExcludeInterface (Ptr<Node> node, uint32_t interface)
     }
 }
 
-Ptr<Ipv4RoutingProtocol> OlsrCustomHelper::Create (Ptr<Node> node) const
+Ptr<Ipv4RoutingProtocol> CustomOlsrHelper::Create (Ptr<Node> node) const
 {
   Ptr<olsr::RoutingProtocol> agent = m_agentFactory.Create<olsr::RoutingProtocol> ();
 
@@ -81,12 +79,14 @@ Ptr<Ipv4RoutingProtocol> OlsrCustomHelper::Create (Ptr<Node> node) const
   return agent;
 }
 
-void OlsrCustomHelper::Set (std::string name, const AttributeValue &value)
+void
+CustomOlsrHelper::Set (std::string name, const AttributeValue &value)
 {
   m_agentFactory.Set (name, value);
 }
 
-int64_t OlsrCustomHelper::AssignStreams (NodeContainer c, int64_t stream)
+int64_t
+CustomOlsrHelper::AssignStreams (NodeContainer c, int64_t stream)
 {
   int64_t currentStream = stream;
   Ptr<Node> node;

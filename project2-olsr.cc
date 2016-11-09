@@ -41,9 +41,7 @@
 #include "ns3/netanim-module.h"
 #include "ns3/flow-monitor-module.h"
 
-
-//#include "ns3/olsr-helper.h"
-#include "olsr-custom-helper.h"
+#include "custom-olsr-helper.h"
 
 using namespace ns3;
 
@@ -64,21 +62,28 @@ bool enableCtsRts       = true;
 double logDropOff 	= 2.3;
 bool useFriisDropoff 	= false;
 double mobilitySpeed	= 20.0;
-double mobilityPause	= 0.1;
+double mobilityPause	= 0.001;
 
 int seed 		= 4;
 
 //Simulation Timing
 float routingTime       = 2.0;          // time added to start for olsr to converge, seconds
-double flowtime     	= 8.0;           // total time each source will transmit for.
+double flowtime     	= 3.0;           // total time each source will transmit for.
 double sinkExtraTime    = 2.0;		 // extra timer the last packet has to reach the sink, seconds
 
 float totalTime         = routingTime +
 			  flowtime +
 			  sinkExtraTime; // total simulation time, seconds
 
+
+
+bool enableFlowmon 	= true;
+
+bool enableNetanim 	= false;
 bool netanimCounters 	= false;
 bool packetMetadata	= true;
+
+
 double counterInterval  = 0.5;            // netanim counter update interval, seconds
 
 
@@ -210,7 +215,7 @@ void InitTopology()
 
   //===========================
   // Enable OLSR
-  OlsrCustomHelper olsr;
+  CustomOlsrHelper olsr = CustomOlsrHelper(0);
   Ipv4StaticRoutingHelper staticRouting;
   Ipv4ListRoutingHelper list;
   list.Add (olsr, 10);
@@ -319,8 +324,8 @@ void RunUDPSourceSink()
   }
 
 	//TRACE totals
-	NS_LOG_UNCOND("====TOTALS====");
-	NS_LOG_UNCOND("Flow ID: 0 -> " << numNodes);
+	NS_LOG_UNCOND("\n====TOTALS====");
+	NS_LOG_UNCOND("Flow ID: 0 -> " << nSources);
 	NS_LOG_UNCOND("Tx Packets = " << totalTxPackets);
 	NS_LOG_UNCOND("Rx PAckets = " << totalRxPackets);
 	NS_LOG_UNCOND("Dropped Packets = " << totalDropped);
@@ -339,30 +344,34 @@ int main (int argc, char *argv[])
 
   InitTopology();
 
-  //NetAnim Setup
-  NS_LOG_UNCOND ("Outputing NetAnim to animation.xml");
-  anim = new AnimationInterface("animation.xml");
-  if(netanimCounters) {
-    anim->EnableWifiPhyCounters(Seconds(0), Seconds(totalTime), Seconds(counterInterval));
-    anim->EnableWifiMacCounters(Seconds(0), Seconds(totalTime), Seconds(counterInterval));
-    anim->EnableIpv4L3ProtocolCounters(Seconds(0), Seconds(totalTime), Seconds(counterInterval));
+  if(enableNetanim) {
+    anim = new AnimationInterface("animation.xml");
+    if(netanimCounters) {
+      anim->EnableWifiPhyCounters(Seconds(0), Seconds(totalTime), Seconds(counterInterval));
+      anim->EnableWifiMacCounters(Seconds(0), Seconds(totalTime), Seconds(counterInterval));
+      anim->EnableIpv4L3ProtocolCounters(Seconds(0), Seconds(totalTime), Seconds(counterInterval));
+    }
+    if(packetMetadata) {
+      anim->EnablePacketMetadata();
+    }
+    anim->SetStartTime(Seconds(0));
+    anim->SetStopTime(Seconds(totalTime));
   }
-  if(packetMetadata) {
-    anim->EnablePacketMetadata();
-  }
-  anim->SetStartTime(Seconds(0));
-  anim->SetStopTime(Seconds(totalTime));
 
-
-
-
+  //if(enableFlowmon) {
+  //TODO segfault if this gets disabled
   flowMonitor = flowmon.InstallAll();
-
+  //}
+  
   RunUDPSourceSink();
 
-  NS_LOG_UNCOND ("Outputing FlowMonitor to flowmonitor.xml");
-  flowMonitor->SerializeToXmlFile("flowmonitor.xml", true, true);
-
+  if(enableNetanim) {
+    NS_LOG_UNCOND ("Outputing NetAnim to animation.xml");
+  }
+  if(enableFlowmon) {
+    NS_LOG_UNCOND ("Outputing FlowMonitor to flowmonitor.xml");
+    flowMonitor->SerializeToXmlFile("flowmonitor.xml", true, true);
+  }
 
   delete anim;
 

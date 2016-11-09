@@ -20,8 +20,8 @@
  *          Gustavo J. A. M. Carneiro <gjc@inescporto.pt>
  */
 
-#ifndef OLSR_CUSTOM_AGENT_IMPL_H
-#define OLSR_CUSTOM_AGENT_IMPL_H
+#ifndef OLSR_AGENT_IMPL_H
+#define OLSR_AGENT_IMPL_H
 
 #include "olsr-header.h"
 #include "ns3/test.h"
@@ -47,7 +47,7 @@
 class OlsrMprTestCase;
 
 namespace ns3 {
-namespace olsrcustom {
+namespace olsr {
 
 ///
 /// \defgroup olsr OLSR Routing

@@ -32,8 +32,7 @@
   if (GetObject<Node> ()) { std::clog << "[node " << GetObject<Node> ()->GetId () << "] "; }
 
 
-#include "olsr-custom-routing-protocol.h"
-
+#include "olsr-routing-protocol.h"
 #include "ns3/socket-factory.h"
 #include "ns3/udp-socket-factory.h"
 #include "ns3/simulator.h"
@@ -59,6 +58,7 @@
 ///
 #define DELAY(time) (((time) < (Simulator::Now ())) ? Seconds (0.000001) : \
                      (time - Simulator::Now () + Seconds (0.000001)))
+
 
 
 ///
@@ -140,7 +140,7 @@
 
 namespace ns3 {
 
-NS_LOG_COMPONENT_DEFINE ("OlsrRoutingProtocol");
+NS_LOG_COMPONENT_DEFINE ("CustomOlsrRoutingProtocol");
 
 namespace olsr {
 
@@ -151,7 +151,7 @@ NS_OBJECT_ENSURE_REGISTERED (RoutingProtocol);
 TypeId
 RoutingProtocol::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::olsr::RoutingProtocol") //TODO: use custom for each these
+  static TypeId tid = TypeId ("ns3::olsr::RoutingProtocol")
     .SetParent<Ipv4RoutingProtocol> ()
     .SetGroupName ("Olsr")
     .AddConstructor<RoutingProtocol> ()
@@ -1755,7 +1755,7 @@ RoutingProtocol::SendTc ()
 
   olsr::MessageHeader::Tc &tc = msg.GetTc ();
   tc.ansn = m_ansn;
-
+  
   //TODO: MODIFICATION 3: Randomly remove half the elements from MprSelectorSet
   for (MprSelectorSet::const_iterator mprsel_tuple = m_state.GetMprSelectors ().begin ();
        mprsel_tuple != m_state.GetMprSelectors ().end (); mprsel_tuple++)
@@ -3136,3 +3136,5 @@ RoutingProtocol::GetRoutingTableAssociation () const
 
 } // namespace olsr
 } // namespace ns3
+
+
