@@ -21,7 +21,7 @@
 // Based on the provided ns3 sample in directory examples/wireless/wifi-simple-adhoc-grid.cc
 
 //Nodes: 50 in area of 1500x1500m
-//3 mobility speeds: 1m/s, 10m/s, 20m/s 
+//3 mobility speeds: 1m/s, 10m/s, 20m/s
 //Mobility: random way point mobility
 //CBR traffic sources: node 10, 20, 30
 //performance => throughput of protocol
@@ -73,9 +73,9 @@ float routingTime       = 2.0;          // time added to start for olsr to conve
 double flowtime     	= 8.0;           // total time each source will transmit for.
 double sinkExtraTime    = 2.0;		 // extra timer the last packet has to reach the sink, seconds
 
-float totalTime         = routingTime + 
-			  flowtime + 
-			  sinkExtraTime; // total simulation time, seconds 
+float totalTime         = routingTime +
+			  flowtime +
+			  sinkExtraTime; // total simulation time, seconds
 
 bool netanimCounters 	= false;
 bool packetMetadata	= true;
@@ -108,7 +108,7 @@ void ParseCommands(int argc, char **argv)
   cmd.AddValue ("enableCtsRts", "enable CTS/RTS", enableCtsRts);
   cmd.AddValue ("tracing", "turn on ascii and pcap tracing", tracing);
   cmd.AddValue ("verbose", "turn on all WifiNetDevice log components", verbose);
-  
+
   cmd.Parse (argc, argv);
 }
 
@@ -123,47 +123,48 @@ void InitTopology()
 {
   //============================================
   //Extra settings
-  
+
   // disable fragmentation for frames below 3000 bytes
   //Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("3000"));
-  
+
   // turn on/off RTS/CTS for frames below 3000 bytes
   UintegerValue ctsThr = (enableCtsRts ? UintegerValue (100) : UintegerValue (5000));
   Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", ctsThr);
-  
+
   // Fix non-unicast data rate to be the same as that of unicast
   //Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode", StringValue (phyMode));
 
   c.Create (numNodes);
-  
+
   //=====================
   //wifi - standard/modes
   WifiHelper wifi;
   if(verbose) { wifi.EnableLogComponents (); } // Turn on all Wifi logging
-  wifi.SetStandard (phyStandard);  
+  wifi.SetStandard (phyStandard);
   wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
 				"DataMode",StringValue (phyMode),
 				"ControlMode",StringValue (phyMode));
-  
+
   //==============================
   //wifi - MAC
   // Add an upper mac and disable rate control
   NqosWifiMacHelper wifiMac = NqosWifiMacHelper::Default();
-  // Set it to adhoc mode
+
+	// Set it to adhoc mode
   wifiMac.SetType ("ns3::AdhocWifiMac");
-  
+
   //===============================
   //wifi - Phy
-  wifiPhy = YansWifiPhyHelper::Default ();  
+  wifiPhy = YansWifiPhyHelper::Default ();
   // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
-  if(tracing) wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11_RADIO); 
+  if(tracing) wifiPhy.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11_RADIO);
 
   //====================================
   //wifi - Channel
   //YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
-  
+
   YansWifiChannelHelper wifiChannel;
-  
+
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   if(useFriisDropoff) {
     wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
@@ -171,10 +172,10 @@ void InitTopology()
   else {
     wifiChannel.AddPropagationLoss("ns3::LogDistancePropagationLossModel", "Exponent", DoubleValue(logDropOff));
   }
-  
+
   wifiPhy.SetChannel (wifiChannel.Create ());
-  
-  
+
+
   //=======================
   //wifi - Install
   devices = wifi.Install (wifiPhy, wifiMac, c);
@@ -183,62 +184,51 @@ void InitTopology()
     wifiPhy.EnablePcap("wifi-adhoc", devices);
     wifiPhy.EnableAscii("wifi-adhoc", devices);
   }
-  
+
   //========================
   //mobility - Grid Allocator
   MobilityHelper mobility;
-  //GridPositionAllocator
-  
+
   //====================
   //PositionAllocator
-  
-  
-  mobility.SetPositionAllocator("ns3::RandomRectanglePositionAllocator",
+	mobility.SetPositionAllocator("ns3::RandomRectanglePositionAllocator",
 				"X", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"),
 				"Y", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"));
 
-  
-  
   //=============
   //MobilityModel
-
-    
   mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel",
-			    "Speed", PointerValue(CreateObjectWithAttributes<ns3::ConstantRandomVariable>("Constant", DoubleValue(mobilitySpeed))), 
+			    "Speed", PointerValue(CreateObjectWithAttributes<ns3::ConstantRandomVariable>("Constant", DoubleValue(mobilitySpeed))),
 			    "Pause", PointerValue(CreateObjectWithAttributes<ns3::ConstantRandomVariable>("Constant", DoubleValue(mobilityPause))),
 			    "PositionAllocator", PointerValue(CreateObjectWithAttributes<ns3::RandomRectanglePositionAllocator>(
 			    "X", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"),
 			    "Y", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"))));
-  
- 
+
+
   mobility.Install(c);
-  
   //Config::Connect("/NodeList/*/$ns3::MobilityModel/CourseChange", MakeCallback(&CourseChange));
-  
+
   //===========================
   // Enable OLSR
-  
   OlsrCustomHelper olsr;
   Ipv4StaticRoutingHelper staticRouting;
   Ipv4ListRoutingHelper list;
   list.Add (olsr, 10);
   list.Add (staticRouting, 0);
 
-  
-
   //========================
   // Ipv4
   InternetStackHelper internet;
   internet.SetRoutingHelper(list); // has effect on the next Install ()
   internet.Install (c);
-  
+
   Ipv4AddressHelper ipv4;
   NS_LOG_INFO ("Assign IP Addresses.");
   ipv4.SetBase ("10.1.1.0", "255.255.255.0");
   i = ipv4.Assign (devices);
-  
+
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
-  
+
 }
 
 void ReceivePacket (Ptr<Socket> socket)
@@ -267,60 +257,76 @@ void RunUDPSourceSink()
   int port = 80;
   TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 
-  
   ApplicationContainer app;
-  
-  
+
   for(int n = 0; n < nSources; n++) {
     int sourceNode = n;
     int sinkNode = numNodes - n - 1;
-    
+
     OnOffHelper onoff = OnOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
     onoff.SetConstantRate(DataRate(datarate));
     app = onoff.Install(c.Get(sourceNode));
     app.Start(Seconds(routingTime));
     app.Stop(Seconds(routingTime + flowtime));
-    
+
     PacketSinkHelper sink = PacketSinkHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(i.GetAddress(sinkNode), port)));
     app.Start(Seconds(routingTime));
     app.Stop(Seconds(routingTime + flowtime + sinkExtraTime));
   }
-  
+
   //====================
   //Simulation
-  
+
   Simulator::Stop (Seconds(totalTime));
   Simulator::Run ();
   Simulator::Destroy ();
-  
+
   //=====================
   //monitor dropped packets
-  
+
   flowMonitor->CheckForLostPackets();
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
   std::map<FlowId, FlowMonitor::FlowStats> stats = flowMonitor->GetFlowStats();
   NS_LOG_UNCOND("PACKETS: " << stats.size());
-  
-  
+
+	int totalTxPackets = 0;
+	int totalRxPackets = 0;
+	int totalDropped = 0;
+	double totalThroughput = 0.0;
+
+	//TRACE each flow
   for(std::map<FlowId, FlowMonitor::FlowStats>::const_iterator iter = stats.begin(); iter != stats.end(); ++iter) {
-    Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow(iter->first);
-    
+
+		Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow(iter->first);
 
     //if(  (t.sourceAddress == Ipv4Address(0x0a010100 + 1)  && t.destinationAddress == Ipv4Address(0x0a010100 + 50)))
-    //{    
-      NS_LOG_UNCOND("Flow ID: " << iter->first << " Src Addr: " << t.sourceAddress << " Dst Addr: " << t.destinationAddress);
+    //{
+
+			double throughput = iter->second.rxBytes * 8.0 / (iter->second.timeLastRxPacket.GetSeconds() - iter->second.timeFirstTxPacket.GetSeconds()) / 1024;
+
+      NS_LOG_UNCOND("Flow ID: " << iter->first << " Src_Addr: " << t.sourceAddress << " Dst_Addr: " << t.destinationAddress);
       NS_LOG_UNCOND("Tx Packets = " << iter->second.txPackets);
       NS_LOG_UNCOND("Rx PAckets = " << iter->second.rxPackets);
       NS_LOG_UNCOND("Dropped Packets = " << iter->second.txPackets - iter->second.rxPackets);
-      
-      NS_LOG_UNCOND(
-	"Throughput: " 
-	<< iter->second.rxBytes * 8.0 / (iter->second.timeLastRxPacket.GetSeconds() 
-	- iter->second.timeFirstTxPacket.GetSeconds()) / 1024 
-	<< " Kbps");
+      NS_LOG_UNCOND("Throughput: " << throughput << " Kbps");
+
+			totalTxPackets += iter->second.txPackets;
+			totalRxPackets += iter->second.rxPackets;
+			totalDropped += iter->second.txPackets - iter->second.rxPackets;
+			totalThroughput += throughput;
     //}
+
   }
-  
+
+	//TRACE totals
+	NS_LOG_UNCOND("====TOTALS====");
+	NS_LOG_UNCOND("Flow ID: 0 -> " << numNodes);
+	NS_LOG_UNCOND("Tx Packets = " << totalTxPackets);
+	NS_LOG_UNCOND("Rx PAckets = " << totalRxPackets);
+	NS_LOG_UNCOND("Dropped Packets = " << totalDropped);
+	NS_LOG_UNCOND("Throughput: " << totalThroughput << " Kbps");
+
+
 }
 
 int main (int argc, char *argv[])
@@ -330,7 +336,7 @@ int main (int argc, char *argv[])
 
   ns3::SeedManager::SetSeed(seed);
   //ns3::SeedManager::SetRun(5);
-  
+
   InitTopology();
 
   //NetAnim Setup
@@ -347,19 +353,18 @@ int main (int argc, char *argv[])
   anim->SetStartTime(Seconds(0));
   anim->SetStopTime(Seconds(totalTime));
 
-  
-  
+
+
 
   flowMonitor = flowmon.InstallAll();
-  
+
   RunUDPSourceSink();
-  
+
   NS_LOG_UNCOND ("Outputing FlowMonitor to flowmonitor.xml");
   flowMonitor->SerializeToXmlFile("flowmonitor.xml", true, true);
 
-  
+
   delete anim;
-  
+
   return 0;
 }
-
