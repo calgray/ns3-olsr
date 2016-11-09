@@ -1833,11 +1833,34 @@ RoutingProtocol::SendTc ()
   tc.ansn = m_ansn;
   
   //TODO: MODIFICATION 3: Randomly remove half the elements from MprSelectorSet
-  for (MprSelectorSet::const_iterator mprsel_tuple = m_state.GetMprSelectors ().begin ();
-       mprsel_tuple != m_state.GetMprSelectors ().end (); mprsel_tuple++)
-    {
-      tc.neighborAddresses.push_back (mprsel_tuple->mainAddr);
+  
+   if(m_mode == 3) {
+    
+      MprSelectorSet shuffledvector = MprSelectorSet(m_state.GetMprSelectors().begin(), m_state.GetMprSelectors().end());
+      std::random_shuffle(shuffledvector.begin(), shuffledvector.end());
+      
+      MprSelectorSet halfvector;
+      
+      for(uint i = 0; i < (shuffledvector.size()+1)/2; i++) {
+	halfvector.insert(mprvector[i]);
+      }
+	
+      for (MprSelectorSet::const_iterator mprsel_tuple = halfvector.begin();
+	      mprsel_tuple != halfvector.end(); mprsel_tuple++)
+      {
+	tc.neighborAddresses.push_back (mprsel_tuple->mainAddr);
+      }
     }
+    
+    else {
+      for (MprSelectorSet::const_iterator mprsel_tuple = m_state.GetMprSelectors ().begin ();
+	  mprsel_tuple != m_state.GetMprSelectors ().end (); mprsel_tuple++)
+	{
+	  tc.neighborAddresses.push_back (mprsel_tuple->mainAddr);
+	}
+    }
+
+    
   QueueMessage (msg, JITTER);
 }
 
@@ -2453,9 +2476,13 @@ RoutingProtocol::LinkTupleUpdated (const LinkTuple &tuple, uint8_t willingness)
     {
       int statusBefore = nb_tuple->status;
 
+      
+      bool hasSymmetricLink = false;
+      
       //TODO: MODIFICATION 4: Fake hasSymmetricLink to always be true
-	  bool hasSymmetricLink = false;
+      if(m_mode == 4) hasSymmetricLink = true;
 
+	  
       const LinkSet &linkSet = m_state.GetLinks ();
       for (LinkSet::const_iterator it = linkSet.begin ();
            it != linkSet.end (); it++)
