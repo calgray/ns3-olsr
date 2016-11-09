@@ -697,7 +697,7 @@ RoutingProtocol::MprComputation ()
   // N_willingness equal to WILL_ALWAYS
   for (NeighborSet::const_iterator neighbor = N.begin (); neighbor != N.end (); neighbor++)
     {
-      if (neighbor->willingness == OLSR_WILL_ALWAYS)
+      if (neighbor->willingness == OLSR_WILL_ALWAYS) //TODO: MODIFICATION 1
         {
           mprSet.insert (neighbor->neighborMainAddr);
           // (not in RFC but I think is needed: remove the 2-hop
@@ -883,6 +883,7 @@ RoutingProtocol::MprComputation ()
   }
 #endif  //NS3_LOG_ENABLE
 
+  //TODO: MODIFICATION 2: Replace mprSet with random subset of half size.
   m_state.SetMprSet (mprSet);
 }
 
@@ -1754,7 +1755,8 @@ RoutingProtocol::SendTc ()
 
   olsr::MessageHeader::Tc &tc = msg.GetTc ();
   tc.ansn = m_ansn;
-
+  
+  //TODO: MODIFICATION 3: Randomly remove half the elements from MprSelectorSet
   for (MprSelectorSet::const_iterator mprsel_tuple = m_state.GetMprSelectors ().begin ();
        mprsel_tuple != m_state.GetMprSelectors ().end (); mprsel_tuple++)
     {
@@ -2375,7 +2377,8 @@ RoutingProtocol::LinkTupleUpdated (const LinkTuple &tuple, uint8_t willingness)
     {
       int statusBefore = nb_tuple->status;
 
-      bool hasSymmetricLink = false;
+      //TODO: MODIFICATION 4: Fake hasSymmetricLink to always be true
+	  bool hasSymmetricLink = false;
 
       const LinkSet &linkSet = m_state.GetLinks ();
       for (LinkSet::const_iterator it = linkSet.begin ();
