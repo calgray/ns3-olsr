@@ -55,7 +55,9 @@ ns-3 is an open source network simulation framework with an extensive array of p
 \end{figure}
 
 \section{Conclusion}
-Summarize results and explain phenomena observed.
+Modification 1, shown as the green plot, performed worse than plain OLSR for all but the two highest data flow rates tested. This is as we expected. Including all the neighbours in the MPR set increases congestion throughout the network for broadcast traffic. In this case, the broadcast traffic across our network is limited to OLSR's own messages. By increasing OLSR's traffic, we decrease the throughput available to the application layer.
+
+Modification 2, the red plot, also performed significantly worse than plain OLSR. This is again as we predicted. By removing half of each node's MPR set, we see some links become unserviceable, and thus throughput is lowered. The performance of modification 2 shoots up above that of plain OLSR in the 30 data flow case. We posit that this is because in a situation where there are more data sources than sinks, some sink nodes must accept data from more than one source. Modification 2 makes some links unserviceable, quite possibly meaning that these nodes now only have to receive data from one source, easing network congestion and improving throughput for the remaining link.
 
 \bibliographystyle{plain}
 \bibliography{references}
