@@ -43,6 +43,12 @@
 
 #include "custom-olsr-helper.h"
 
+
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <fstream>
+
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("Project-2");
@@ -53,7 +59,7 @@ WifiPhyStandard phyStandard = WIFI_PHY_STANDARD_80211b;
 
 
 // Configuration
-std::string datarate 	= "400kb/s";
+std::string datarate 	= "200kb/s";
 uint32_t numNodes       = 50;
 double distance         = 1500.0;         // distance between nodes, meters
 int nSources 		= 30;
@@ -78,11 +84,11 @@ float totalTime         = routingTime +
 
 
 
-bool enableFlowmon 	= true;
+bool enableFlowmon 	= false;
 
 bool enableNetanim 	= false;
 bool netanimCounters 	= false;
-bool packetMetadata	= true;
+bool packetMetadata	= false;
 
 
 double counterInterval  = 0.5;            // netanim counter update interval, seconds
@@ -99,7 +105,7 @@ Ipv4InterfaceContainer i;
 
 //Tracing
 AnimationInterface *anim;
-FlowMonitorHelper flowmon;
+FlowMonitorHelper* flowmon;
 Ptr<FlowMonitor> flowMonitor;
 
 bool verbose = false;
@@ -109,13 +115,21 @@ void ParseCommands(int argc, char **argv)
 {
   CommandLine cmd;
 
+
+  
   cmd.AddValue ("phyMode", "Wifi Phy mode", phyMode);
   cmd.AddValue ("distance", "distance (m)", distance);
   cmd.AddValue ("enableCtsRts", "enable CTS/RTS", enableCtsRts);
   cmd.AddValue ("tracing", "turn on ascii and pcap tracing", tracing);
   cmd.AddValue ("verbose", "turn on all WifiNetDevice log components", verbose);
 
+  cmd.AddValue("seed", "seed", seed);
+  cmd.AddValue("flows", "flows", nSources);
+  cmd.AddValue("mobility", "mobility", mobilitySpeed);
+  cmd.AddValue("mode", "mode", mode);
+  
   cmd.Parse (argc, argv);
+  
 }
 
 
@@ -239,8 +253,9 @@ void InitTopology()
 
 }
 
-void RunUDPSourceSink()
+double RunUDPSourceSink()
 {
+  
   int port = 80;
   TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
 
@@ -272,7 +287,7 @@ void RunUDPSourceSink()
   //monitor dropped packets
 
   flowMonitor->CheckForLostPackets();
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon->GetClassifier());
   std::map<FlowId, FlowMonitor::FlowStats> stats = flowMonitor->GetFlowStats();
   NS_LOG_UNCOND("PACKETS: " << stats.size());
 
@@ -313,10 +328,10 @@ void RunUDPSourceSink()
 	NS_LOG_UNCOND("Dropped Packets = " << totalDropped);
 	NS_LOG_UNCOND("Throughput: " << totalThroughput << " Kbps");
 
-
+      return totalThroughput;
 }
 
-int main (int argc, char *argv[])
+int main1 (int argc, char *argv[])
 {
 
   ParseCommands(argc, argv);
@@ -342,7 +357,7 @@ int main (int argc, char *argv[])
 
   //if(enableFlowmon) {
   //TODO segfault if this gets disabled
-  flowMonitor = flowmon.InstallAll();
+  flowMonitor = flowmon->InstallAll();
   //}
   
   RunUDPSourceSink();
@@ -352,10 +367,122 @@ int main (int argc, char *argv[])
   }
   if(enableFlowmon) {
     NS_LOG_UNCOND ("Outputing FlowMonitor to flowmonitor.xml");
-    flowMonitor->SerializeToXmlFile("flowmonitor.xml", true, true);
+    //flowMonitor->SerializeToXmlFile("flowmonitor.xml", true, true);
   }
 
-  delete anim;
+  if(enableNetanim) delete anim;
 
   return 0;
 }
+
+
+//TODO Copy this to project2-olsr.cc
+double SingleExperiment(int s, int f, int ms, int md) {
+  
+  seed = s;
+  nSources = f;
+  mobilitySpeed = ms;
+  mode = md;
+  
+  /*
+  char n[20], s[20], f[20], ms[20], mo[20];
+  std::sprintf(n, "project2");
+  std::sprintf(s, "--seed=%i", seed);
+  std::sprintf(f, "--flows=%i", flows);
+  std::sprintf(ms, "--mobility=%i", mobilitySpeed);
+  std::sprintf(ms, "--mode=%i", mode);
+  
+  char *args[] = { n, s, f, ms, mo};
+  
+  main1(5, args);
+  */
+  
+  c = NodeContainer();
+  devices = NetDeviceContainer();
+  i = Ipv4InterfaceContainer();
+  
+  ns3::SeedManager::SetSeed(seed);
+  //ns3::SeedManager::SetRun(5);
+
+    
+  NS_LOG_UNCOND("start");
+  
+  InitTopology();
+
+  //FlowMonitorHelper flowmon;
+  flowmon = new FlowMonitorHelper();
+  flowMonitor = flowmon->InstallAll();
+  
+  
+  double total =  RunUDPSourceSink();
+  
+  flowMonitor->Dispose();
+  delete flowmon;
+  
+  return total;
+}
+
+//Used as a wrapper function around the project2.olsr.cc main method when
+//doing large scale testing with various parameters
+//Outputs a csv file which is fairly descriptive - each value is an average
+int main (int argc, char *argv[]) //TODO remove the 1 to make this work
+{
+	int repeatedTrials 	= 5;  //how many times each experiment is seeded and executed
+
+	int mobility    	= 1; //speed of nodes in m/s
+	int mobilityInc 	= 5;  //distance between trials
+	int mobilityMax 	= 21; //last value for trial
+
+	int nSources    	= 5; //number of sources of flows
+	int nSourcesInc 	= 5;  //distance between trials
+	int nSourcesMax 	= 30; //last value for trial
+
+	//Set up file for Output
+	std::ofstream myfile;
+	myfile.open ("results.csv");
+	myfile << "Results\n";
+
+	//Changing Sources/flow count with constant mobility speed
+	for (int mode = 0; mode < 5; mode++) {
+		//Print heading
+		myfile << std::endl;
+		if(mode == 0) myfile << "Plain OLSR";
+		else myfile << "Modification " << mode; 
+		myfile << std::endl;
+
+		//Sources
+		myfile << "nSources,";
+		for (nSources = 5; nSources <= nSourcesMax; nSources+=nSourcesInc) {
+			myfile << nSources << ",";
+		}
+		myfile << "\nThroughput,";
+		//Get results and average;
+		for (nSources = 5; nSources <= nSourcesMax; nSources+=nSourcesInc) {
+			double result = 0;
+			for (int seed = 1; seed <= repeatedTrials; seed++) {
+				result += SingleExperiment(seed, nSources, mobility, mode);
+			}
+			myfile << result/repeatedTrials << ",";
+		}
+
+		//Mobility
+		myfile << "\nCBR (Mbps),";
+		for (mobility = 1; mobility <= mobilityMax; mobility += mobilityInc) {
+			myfile << mobility << ",";
+		}
+		myfile << "\nThroughput,";
+		
+		nSources = 20; 									//reset number of Sources for the mobility tests
+		for (mobility = 1; mobility <= mobilityMax; mobility += mobilityInc) {
+			double result = 0;
+			for (int seed = 1; seed <= repeatedTrials; seed++) {
+				result += SingleExperiment(seed, nSources, mobility, mode);
+			}
+			myfile << result/repeatedTrials << ",";
+		}
+		myfile << "\n\n";
+	}
+	myfile.close();
+	return 0;
+}
+
