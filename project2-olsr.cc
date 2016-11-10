@@ -75,7 +75,7 @@ int mode 		= 0;
 
 //Simulation Timing
 float routingTime       = 0.0;          // time added to start for olsr to converge, seconds
-double flowtime     	= 8.0;           // total time each source will transmit for.
+double flowtime     	= 50.0;           // total time each source will transmit for.
 double sinkExtraTime    = 2.0;		 // extra timer the last packet has to reach the sink, seconds
 
 float totalTime         = routingTime +
@@ -416,7 +416,7 @@ double SingleExperiment(int s, int f, int ms, int md) {
 //Outputs a csv file which is fairly descriptive - each value is an average
 int main (int argc, char *argv[]) //TODO remove the 1 to make this work
 {
-	int repeatedTrials 	= 3;  //how many times each experiment is seeded and executed
+	int repeatedTrials 	= 1;  //how many times each experiment is seeded and executed
 
 	const int mobilitySt    = 1; //speed of nodes in m/s
 	const int mobilityInc 	= 5;  //distance between trials
@@ -432,7 +432,7 @@ int main (int argc, char *argv[]) //TODO remove the 1 to make this work
 	myfile << "Results\n";
 
 	//Changing Sources/flow count with constant mobility speed
-	for (int mode = 2; mode < 5; mode++) {
+	for (int mode = 0; mode < 5; mode++) {
 		
 	  //Print heading
 		myfile << std::endl;
