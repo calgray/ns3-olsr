@@ -59,6 +59,8 @@ Modification 1, shown as the green plot, performed worse than plain OLSR for all
 
 Modification 2, the red plot, also performed significantly worse than plain OLSR. This is again as we predicted. By removing half of each node's MPR set, we see some links become unserviceable, and thus throughput is lowered. The performance of modification 2 shoots up above that of plain OLSR in the 30 data flow case. We posit that this is because in a situation where there are more data sources than sinks, some sink nodes must accept data from more than one source. Modification 2 makes some links unserviceable, quite possibly meaning that these nodes now only have to receive data from one source, easing network congestion and improving throughput for the remaining link.
 
+Modification 3, the blue plot, performed worse than plain OLSR for the majority of tests. This is in line with our predictions. By reducing the number of nodes in the MPR set being sent, the routing tables are built without knowledge of all possible routes in the network. This produces inefficient routes and most of the time will increase conjestion. However, there is a chance that by randomising the neighbors being sent, the traffic will split in such a way to improve the overall throughput and this is observed in some trials. 
+
 Modification 4, the purple plot, actually saw an increase in throughput across the board over plain OLSR. This is contrary to our expectations. We think this may be due to the fact that if there are \(n\) bi-directional paths to a node, then there are \(m \geq n\) uni-directional paths to that node. In our case, we only have uni-directional data flows, so these extra uni-directional links can be utilised to improve overall throughput.
 
 \bibliographystyle{plain}
