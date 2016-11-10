@@ -384,18 +384,6 @@ double SingleExperiment(int s, int f, int ms, int md) {
   mobilitySpeed = ms;
   mode = md;
   
-  /*
-  char n[20], s[20], f[20], ms[20], mo[20];
-  std::sprintf(n, "project2");
-  std::sprintf(s, "--seed=%i", seed);
-  std::sprintf(f, "--flows=%i", flows);
-  std::sprintf(ms, "--mobility=%i", mobilitySpeed);
-  std::sprintf(ms, "--mode=%i", mode);
-  
-  char *args[] = { n, s, f, ms, mo};
-  
-  main1(5, args);
-  */
   
   c = NodeContainer();
   devices = NetDeviceContainer();
@@ -405,7 +393,8 @@ double SingleExperiment(int s, int f, int ms, int md) {
   //ns3::SeedManager::SetRun(5);
 
     
-  NS_LOG_UNCOND("start");
+  NS_LOG_UNCOND("starting");
+  std::clog << "s=" << s << ", f=" << f << ", ms=" << ms << ", md=" << md << std::endl;
   
   InitTopology();
 
@@ -427,60 +416,76 @@ double SingleExperiment(int s, int f, int ms, int md) {
 //Outputs a csv file which is fairly descriptive - each value is an average
 int main (int argc, char *argv[]) //TODO remove the 1 to make this work
 {
-	int repeatedTrials 	= 5;  //how many times each experiment is seeded and executed
+	int repeatedTrials 	= 3;  //how many times each experiment is seeded and executed
 
-	int mobility    	= 1; //speed of nodes in m/s
-	int mobilityInc 	= 5;  //distance between trials
-	int mobilityMax 	= 21; //last value for trial
+	const int mobilitySt    = 1; //speed of nodes in m/s
+	const int mobilityInc 	= 5;  //distance between trials
+	const int mobilityMax 	= 21; //last value for trial
 
-	int nSources    	= 5; //number of sources of flows
-	int nSourcesInc 	= 5;  //distance between trials
-	int nSourcesMax 	= 30; //last value for trial
+	const int nSourcesSt   	= 5; //number of sources of flows
+	const int nSourcesInc 	= 5;  //distance between trials
+	const int nSourcesMax 	= 30; //last value for trial
 
 	//Set up file for Output
 	std::ofstream myfile;
-	myfile.open ("results.csv");
+	myfile.open ("results(2-4).csv");
 	myfile << "Results\n";
 
 	//Changing Sources/flow count with constant mobility speed
-	for (int mode = 0; mode < 5; mode++) {
-		//Print heading
+	for (int mode = 2; mode < 5; mode++) {
+		
+	  //Print heading
 		myfile << std::endl;
 		if(mode == 0) myfile << "Plain OLSR";
 		else myfile << "Modification " << mode; 
 		myfile << std::endl;
 
-		//Sources
-		myfile << "nSources,";
-		for (nSources = 5; nSources <= nSourcesMax; nSources+=nSourcesInc) {
-			myfile << nSources << ",";
+		//Flows
+		myfile << "flows (mobility=20),"; 
+		for (int f = nSourcesSt; f <= nSourcesMax; f+=nSourcesInc) {
+			myfile << f << ",";
 		}
-		myfile << "\nThroughput,";
-		//Get results and average;
-		for (nSources = 5; nSources <= nSourcesMax; nSources+=nSourcesInc) {
-			double result = 0;
-			for (int seed = 1; seed <= repeatedTrials; seed++) {
-				result += SingleExperiment(seed, nSources, mobility, mode);
-			}
-			myfile << result/repeatedTrials << ",";
-		}
-
-		//Mobility
-		myfile << "\nCBR (Mbps),";
-		for (mobility = 1; mobility <= mobilityMax; mobility += mobilityInc) {
-			myfile << mobility << ",";
-		}
-		myfile << "\nThroughput,";
+		myfile << std::endl;
 		
-		nSources = 20; 									//reset number of Sources for the mobility tests
-		for (mobility = 1; mobility <= mobilityMax; mobility += mobilityInc) {
-			double result = 0;
-			for (int seed = 1; seed <= repeatedTrials; seed++) {
-				result += SingleExperiment(seed, nSources, mobility, mode);
+		
+		//Get results, each scenario on a new row;
+		for (int seed = 1; seed <= repeatedTrials; seed++) {
+			myfile << "Throughput (seed=" << seed << "),";
+		
+			for (int f = nSourcesSt; f <= nSourcesMax; f+=nSourcesInc) {
+				
+				double result = 0;
+				
+				result = SingleExperiment(seed, f, 20, mode);
+				myfile << result << ",";
+				
 			}
-			myfile << result/repeatedTrials << ",";
+			
+			myfile << std::endl;
 		}
-		myfile << "\n\n";
+		myfile << std::endl;
+		
+		//Mobility
+		myfile << "mobility (flows=20),";
+		for (int m = mobilitySt; m <= mobilityMax; m += mobilityInc) {
+			myfile << m << ",";
+		}
+		myfile << std::endl; 
+		
+		for (int seed = 1; seed <= repeatedTrials; seed++) {
+		
+			myfile << "Throughput (seed=" << seed << "),";
+		 									//reset number of Sources for the mobility tests
+			for (int m = mobilitySt; m <= mobilityMax; m += mobilityInc) {
+				double result = 0;
+				
+				result = SingleExperiment(seed, 20, m, mode);
+				myfile << result << ",";
+			}
+			
+			myfile << std::endl;
+		}
+		myfile << std::endl;
 	}
 	myfile.close();
 	return 0;
