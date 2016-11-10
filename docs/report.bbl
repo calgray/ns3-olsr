@@ -5,4 +5,9 @@ Thomas Clausen and Philippe Jacquet.
 \newblock {Optimized link state routing protocol (OLSR)}.
 \newblock Technical report, 2003.
 
+\bibitem{mcquillan1978arpanet}
+John~M McQuillan, Ira Richer, Eric~C Rosen, and DP~Bertsekas.
+\newblock Arpanet routing algorithm improvements.
+\newblock Technical report, DTIC Document, 1978.
+
 \end{thebibliography}

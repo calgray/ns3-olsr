@@ -1,48 +1,48 @@
-This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2013/W32TeX)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: report.aux
 The style file: plain.bst
 Database file #1: references.bib
 Warning--empty institution in clausen2003optimized
-You've used 1 entry,
+You've used 2 entries,
             2118 wiz_defined-function locations,
-            501 strings with 4102 characters,
-and the built_in function-call counts, 253 in all, are:
-= -- 23
-> -- 13
+            506 strings with 4246 characters,
+and the built_in function-call counts, 547 in all, are:
+= -- 51
+> -- 36
 < -- 0
-+ -- 5
-- -- 4
-* -- 15
-:= -- 54
-add.period$ -- 3
-call.type$ -- 1
-change.case$ -- 6
++ -- 14
+- -- 12
+* -- 35
+:= -- 112
+add.period$ -- 6
+call.type$ -- 2
+change.case$ -- 14
 chr.to.int$ -- 0
-cite$ -- 2
-duplicate$ -- 8
-empty$ -- 16
-format.name$ -- 4
-if$ -- 46
+cite$ -- 3
+duplicate$ -- 16
+empty$ -- 31
+format.name$ -- 12
+if$ -- 102
 int.to.chr$ -- 0
-int.to.str$ -- 1
+int.to.str$ -- 2
 missing$ -- 0
-newline$ -- 8
-num.names$ -- 2
-pop$ -- 5
+newline$ -- 13
+num.names$ -- 4
+pop$ -- 11
 preamble$ -- 1
-purify$ -- 4
+purify$ -- 10
 quote$ -- 0
-skip$ -- 6
+skip$ -- 11
 stack$ -- 0
-substring$ -- 5
+substring$ -- 10
 swap$ -- 0
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 4
+type$ -- 8
 warning$ -- 1
-while$ -- 2
-width$ -- 2
-write$ -- 12
+while$ -- 4
+width$ -- 3
+write$ -- 23
 (There was 1 warning)
